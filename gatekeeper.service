@@ -1,0 +1,37 @@
+[Unit]
+Description=Moderation Station Gatekeeper
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+TimeoutStartSec=0
+ExecStart=/usr/bin/node build/app.js
+SyslogIdentifier=ms-gatekeeper
+WorkingDirectory=/home/nodejs/moderation-station-auther
+Restart=on-failure
+RestartSec=10s
+StandardOutput=journal
+StandardError=journal
+
+User=nodejs
+Group=nodejs
+
+Environment=BASE_PATH=/ms-gatekeeper
+Environment=TWITCH_CLIENT_ID=
+Environment=TWITCH_SECRET=
+Environment=TWITCH_CALLBACK=https://example.com/ms-gatekeeper/oauth2/twitch
+Environment=DISCORD_CLIENT_ID=
+Environment=DISCORD_SECRET=
+Environment=DISCORD_CALLBACK=https://example.com/ms-gatekeeper/oauth2/discord
+#Environment=SECURE_COOKIE=true
+Environment=PORT=8080
+
+# Random seed for session cookies
+Environment=COOKIE_SECRET=
+
+# Bot token
+Environment=DISCORD_TOKEN=
+
+[Install]
+WantedBy=multi-user.target
+
