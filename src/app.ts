@@ -65,11 +65,7 @@ const exchangeCode: (
 		return true;
 	} catch (e) {
 		console.error("exchangeCode", service, e);
-		res.render(`${service}_error`, {
-			...defaults,
-			title: `${service} Error`,
-			session_id: encodeURIComponent(req.sessionID!)
-		});
+		res.redirect(302, BASE_PATH + `/${service}_error`);
 		return false;
 	}
 };
@@ -178,7 +174,7 @@ app.use(
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
-	req.session!.destroy(() => {
+	req.session!.regenerate(() => {
 		res.redirect(302, BASE_PATH + "/discord");
 	});
 });
@@ -190,11 +186,7 @@ app.get("/discord", (req, res) => {
 app.get("/oauth2/discord", async (req, res) => {
 	const query: OAuth2CallbackQuery = req.query as OAuth2CallbackQuery;
 	if (query.state !== req.sessionID) {
-		res.render("state_error", {
-			...defaults,
-			title: "Cookie Error",
-			session_id: encodeURIComponent(req.sessionID!)
-		});
+		res.redirect(302, BASE_PATH + "/state_error");
 	} else {
 		const exchange: OAuth2CodeExchange = {
 			client_id: defaults.discord_client_id,
@@ -218,11 +210,7 @@ app.get("/twitch", (req, res) => {
 app.get("/oauth2/twitch", async (req, res) => {
 	const query: OAuth2CallbackQuery = req.query as OAuth2CallbackQuery;
 	if (query.state !== req.sessionID) {
-		res.render("state_error", {
-			...defaults,
-			title: "Cookie Error",
-			session_id: encodeURIComponent(req.sessionID!)
-		});
+		res.redirect(302, BASE_PATH + "/state_error");
 	} else {
 		const exchange: OAuth2CodeExchange = {
 			client_id: defaults.twitch_client_id,
@@ -236,11 +224,7 @@ app.get("/oauth2/twitch", async (req, res) => {
 		if (await exchangeCode(req, res, exchange, "twitch")) {
 			const tUser: HelixUser | null = await twitchUser(req.session!);
 			if (tUser === null) {
-				res.render("twitch_error", {
-					...defaults,
-					title: "Twitch Error",
-					session_id: encodeURIComponent(req.sessionID!)
-				});
+				res.redirect(302, BASE_PATH + "/twitch_error");
 			} else if (tUser.type === "staff" || tUser.broadcaster_type === "partner") {
 				if (
 					await grantRoles(
@@ -250,17 +234,9 @@ app.get("/oauth2/twitch", async (req, res) => {
 						getNick(tUser)
 					)
 				) {
-					res.render("success", {
-						...defaults,
-						title: "Success",
-						session_id: encodeURIComponent(req.sessionID!)
-					});
+					res.redirect(302, BASE_PATH + "/success");
 				} else {
-					res.render("discord_error", {
-						...defaults,
-						title: "Discord Error",
-						session_id: encodeURIComponent(req.sessionID!)
-					});
+					res.redirect(302, BASE_PATH + "/discord_error");
 				}
 			} else {
 				const mt: ModLookupUserTotals | null = await modTotals(tUser.login);
@@ -279,32 +255,61 @@ app.get("/oauth2/twitch", async (req, res) => {
 							getNick(tUser)
 						)
 					) {
-						res.render("success", {
-							...defaults,
-							title: "Success",
-							session_id: encodeURIComponent(req.sessionID!)
-						});
+						res.redirect(302, BASE_PATH + "/success");
 					} else {
-						res.render("discord_error", {
-							...defaults,
-							title: "Discord Error",
-							session_id: encodeURIComponent(req.sessionID!)
-						});
+						res.redirect(302, BASE_PATH + "/discord_error");
 					}
 				} else {
-					res.render("unfortunate", {
-						...defaults,
-						title: "Too bad",
-						session_id: encodeURIComponent(req.sessionID!),
-						follows: mt.follows,
-						partners: mt.partners,
-						follows_required: FOLLOWS_REQUIRED,
-						partners_required: PARTNERS_REQUIRED
-					});
+					req.session!.mt = mt;
+					res.redirect(302, BASE_PATH + "/unfortunate");
 				}
 			}
 		}
 	}
+});
+
+app.get("/state_error", (req, res) => {
+	res.render("state_error", {
+		...defaults,
+		title: "Cookie Error",
+		session_id: encodeURIComponent(req.sessionID!)
+	});
+});
+
+app.get("/twitch_error", (req, res) => {
+	res.render("twitch_error", {
+		...defaults,
+		title: "Twitch Error",
+		session_id: encodeURIComponent(req.sessionID!)
+	});
+});
+
+app.get("/discord_error", (req, res) => {
+	res.render("discord_error", {
+		...defaults,
+		title: "Discord Error",
+		session_id: encodeURIComponent(req.sessionID!)
+	});
+});
+
+app.get("/success", (req, res) => {
+	res.render("success", {
+		...defaults,
+		title: "Success",
+		session_id: encodeURIComponent(req.sessionID!)
+	});
+});
+
+app.get("/unfortunate", (req, res) => {
+	res.render("unfortunate", {
+		...defaults,
+		title: "Too bad",
+		session_id: encodeURIComponent(req.sessionID!),
+		follows: req.session!.mt && req.session!.mt.follows,
+		partners: req.session!.mt && req.session!.mt.partners,
+		follows_required: FOLLOWS_REQUIRED,
+		partners_required: PARTNERS_REQUIRED
+	});
 });
 
 app.listen(process.env.PORT || 8080, () => console.log("listening"));
