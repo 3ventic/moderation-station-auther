@@ -32,11 +32,11 @@ export const setRolesAndNick: (userID: string, roles: Roles[], nick: string) => 
 	const rolesToAdd: Discord.Role[] = roles
 		.map(r => guild.roles.filter(r2 => r2.name === r).first())
 		.filter(r => !member.roles.get(r.id));
-	console.log("giveRole", userID, rolesToAdd.map(r => r.name));
+	console.log("setRolesAndNick", nick, userID, rolesToAdd.map(r => r.name));
+	await member.setNickname(nick, "Twitch display name");
 	if (rolesToAdd.length === 0) {
 		return;
 	}
 	await member.addRoles(rolesToAdd);
-	await member.setNickname(nick, "Twitch display name");
 	return;
 };
