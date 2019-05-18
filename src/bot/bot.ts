@@ -22,7 +22,11 @@ client.on("ready", () => {
 
 client.login(process.env.DISCORD_TOKEN);
 
-export const giveRole: (userID: string, roles: Roles[]) => void = async (userID: string, roles: Roles[]) => {
+export const setRolesAndNick: (userID: string, roles: Roles[], nick: string) => void = async (
+	userID: string,
+	roles: Roles[],
+	nick: string
+) => {
 	const guild: Discord.Guild = client.guilds.get(GUILD_ID)!;
 	const member: Discord.GuildMember = await guild.fetchMember(userID);
 	const rolesToAdd: Discord.Role[] = roles
@@ -33,5 +37,6 @@ export const giveRole: (userID: string, roles: Roles[]) => void = async (userID:
 		return;
 	}
 	await member.addRoles(rolesToAdd);
+	await member.setNickname(nick, "Twitch display name");
 	return;
 };

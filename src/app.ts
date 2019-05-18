@@ -12,7 +12,7 @@ import fetch, { Response as FetchResponse } from "node-fetch";
 import Session from "express-session";
 import formurlencoded from "form-urlencoded";
 import Discord from "discord.js";
-import { Roles, giveRole } from "./bot/bot";
+import { Roles, setRolesAndNick } from "./bot/bot";
 
 const app: express.Express = express();
 
@@ -124,11 +124,12 @@ const discordUser: (session: Express.Session) => Promise<Discord.User | null> = 
 	}
 };
 
-const grantRoles: (session: Express.Session, isStaff: boolean, isPartner: boolean) => Promise<boolean> = async (
+const grantRoles: (
 	session: Express.Session,
 	isStaff: boolean,
-	isPartner: boolean
-) => {
+	isPartner: boolean,
+	nick: string
+) => Promise<boolean> = async (session: Express.Session, isStaff: boolean, isPartner: boolean, nick: string) => {
 	console.log("grantRoles", isStaff, isPartner);
 	const dUser: Discord.User | null = await discordUser(session);
 	console.log("grantRoles", dUser);
@@ -143,12 +144,22 @@ const grantRoles: (session: Express.Session, isStaff: boolean, isPartner: boolea
 		roles.push(Roles.Partner);
 	}
 	try {
-		await giveRole(dUser.id, roles);
+		await setRolesAndNick(dUser.id, roles, nick);
 		return true;
 	} catch (e) {
 		console.error("grantRoles", e);
 		return false;
 	}
+};
+
+const getNick: (tUser: HelixUser) => string = (tUser: HelixUser) => {
+	if (!tUser.display_name) {
+		return tUser.login;
+	}
+	if (tUser.display_name.toLowerCase().replace(/ /g, "") !== tUser.login) {
+		return tUser.login;
+	}
+	return tUser.display_name;
 };
 
 app.set("view engine", "pug");
@@ -229,7 +240,14 @@ app.get("/oauth2/twitch", async (req, res) => {
 					session_id: encodeURIComponent(req.sessionID!)
 				});
 			} else if (tUser.type === "staff" || tUser.broadcaster_type === "partner") {
-				if (await grantRoles(req.session!, tUser.type === "staff", tUser.broadcaster_type === "partner")) {
+				if (
+					await grantRoles(
+						req.session!,
+						tUser.type === "staff",
+						tUser.broadcaster_type === "partner",
+						getNick(tUser)
+					)
+				) {
 					res.render("success", {
 						...defaults,
 						title: "Success",
@@ -251,7 +269,14 @@ app.get("/oauth2/twitch", async (req, res) => {
 						session_id: encodeURIComponent(req.sessionID!)
 					});
 				} else if (mt.follows >= FOLLOWS_REQUIRED && mt.partners >= PARTNERS_REQUIRED) {
-					if (await grantRoles(req.session!, tUser.type === "staff", tUser.broadcaster_type === "partner")) {
+					if (
+						await grantRoles(
+							req.session!,
+							tUser.type === "staff",
+							tUser.broadcaster_type === "partner",
+							getNick(tUser)
+						)
+					) {
 						res.render("success", {
 							...defaults,
 							title: "Success",
