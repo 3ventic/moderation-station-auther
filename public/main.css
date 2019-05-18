@@ -1,0 +1,52 @@
+html, body {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background-color: #202225;
+	color: #f3f3f3;
+	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
+}
+
+.account-link {
+	display: block;
+	text-decoration: none;
+	padding: 1rem;
+	border-radius: 0.5rem;
+	text-transform: uppercase;
+	width: 15rem;
+	text-align: center;
+	margin: 5rem auto 0;
+}
+
+.account-link:visited {
+	display: none;
+}
+
+#discord {
+	background-color: #7289da;
+	color: #f3f3f3;
+}
+
+#discord:hover {
+	background-color: #6279ca;
+}
+
+#fl {
+	display: flex;
+	flex-direction: column;
+	width: 50rem;
+	margin: 1rem auto 0;
+	background-color: #2f3136;
+	padding: 5rem;
+	border-radius: 0.5rem;
+}
+
+h1 {
+	text-align: center;
+}
+
+a {
+	color: #f3f3f3;
+}

@@ -10,7 +10,10 @@ export type TwitchDefaults = {
 	twitch_scopes: string;
 };
 
-export type PugDefaults = DiscordDefaults & TwitchDefaults;
+export type PugDefaults = DiscordDefaults &
+	TwitchDefaults & {
+		base_path: string;
+	};
 
 export type OAuth2CallbackQuery = {
 	code: string;

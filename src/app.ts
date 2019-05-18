@@ -14,6 +14,7 @@ import formurlencoded from "form-urlencoded";
 import Discord from "discord.js";
 import { Roles, setRolesAndNick, GUILD_ID } from "./bot/bot";
 
+const BASE_PATH: string = process.env.BASE_PATH || "";
 const app: express.Express = express();
 
 const defaults: PugDefaults = {
@@ -22,13 +23,13 @@ const defaults: PugDefaults = {
 	discord_scopes: "identify%20guilds%20guilds.join",
 	twitch_callback: encodeURIComponent(process.env.TWITCH_CALLBACK!),
 	twitch_client_id: process.env.TWITCH_CLIENT_ID!,
-	twitch_scopes: ""
+	twitch_scopes: "",
+	base_path: BASE_PATH
 };
 
 const FOLLOWS_REQUIRED: number = (process.env.FOLLOWS_LIMIT && parseInt(process.env.FOLLOWS_LIMIT, 10)) || 15000;
 const PARTNERS_REQUIRED: number = (process.env.PARTNERS_LIMIT && parseInt(process.env.PARTNERS_LIMIT, 10)) || 1;
 
-const BASE_PATH: string = process.env.BASE_PATH || "";
 const DISCORD_API_BASE: string = "https://discordapp.com/api/v6";
 const TWITCH_ID_BASE: string = "https://id.twitch.tv";
 
@@ -161,6 +162,8 @@ const getNick: (tUser?: HelixUser) => string = (tUser?: HelixUser) => {
 	return tUser.display_name;
 };
 
+app.use(express.static("public"));
+
 app.set("view engine", "pug");
 app.set("views", __dirname + "/views");
 
@@ -174,7 +177,6 @@ app.use(
 		saveUninitialized: true
 	})
 );
-app.use(express.static("public"));
 
 app.get("/", (req, res) => {
 	req.session!.regenerate(() => {
