@@ -1,6 +1,6 @@
 import Discord, { GuildMember } from "discord.js";
 
-const GUILD_ID: string = process.env.DISCORD_GUILD_ID || "352896412880470017";
+export const GUILD_ID: string = process.env.DISCORD_GUILD_ID || "352896412880470017";
 
 export enum Roles {
 	Base = "Verified",

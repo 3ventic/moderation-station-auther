@@ -12,7 +12,7 @@ import fetch, { Response as FetchResponse } from "node-fetch";
 import Session from "express-session";
 import formurlencoded from "form-urlencoded";
 import Discord from "discord.js";
-import { Roles, setRolesAndNick } from "./bot/bot";
+import { Roles, setRolesAndNick, GUILD_ID } from "./bot/bot";
 
 const app: express.Express = express();
 
@@ -148,7 +148,10 @@ const grantRoles: (
 	}
 };
 
-const getNick: (tUser: HelixUser) => string = (tUser: HelixUser) => {
+const getNick: (tUser?: HelixUser) => string = (tUser?: HelixUser) => {
+	if (!tUser) {
+		return "UNKNOWN";
+	}
 	if (!tUser.display_name) {
 		return tUser.login;
 	}
@@ -223,6 +226,7 @@ app.get("/oauth2/twitch", async (req, res) => {
 
 		if (await exchangeCode(req, res, exchange, "twitch")) {
 			const tUser: HelixUser | null = await twitchUser(req.session!);
+			req.session!.tUser = tUser;
 			if (tUser === null) {
 				res.redirect(302, BASE_PATH + "/twitch_error");
 			} else if (tUser.type === "staff" || tUser.broadcaster_type === "partner") {
@@ -240,6 +244,7 @@ app.get("/oauth2/twitch", async (req, res) => {
 				}
 			} else {
 				const mt: ModLookupUserTotals | null = await modTotals(tUser.login);
+				req.session!.mt = mt;
 				if (mt === null) {
 					res.render("ml_error", {
 						...defaults,
@@ -260,7 +265,6 @@ app.get("/oauth2/twitch", async (req, res) => {
 						res.redirect(302, BASE_PATH + "/discord_error");
 					}
 				} else {
-					req.session!.mt = mt;
 					res.redirect(302, BASE_PATH + "/unfortunate");
 				}
 			}
@@ -296,7 +300,9 @@ app.get("/success", (req, res) => {
 	res.render("success", {
 		...defaults,
 		title: "Success",
-		session_id: encodeURIComponent(req.sessionID!)
+		session_id: encodeURIComponent(req.sessionID!),
+		guild_id: GUILD_ID,
+		display_name: getNick(req.session!.tUser)
 	});
 });
 

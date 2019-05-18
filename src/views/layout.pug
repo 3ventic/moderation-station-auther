@@ -1,6 +1,7 @@
 - var discord_url = "https://discordapp.com/api/oauth2/authorize?client_id=" + discord_client_id + "&redirect_uri=" + discord_callback + "&response_type=code&scope=" + discord_scopes + "&state=" + session_id
 - var twitch_url = "https://id.twitch.tv/oauth2/authorize?client_id=" + twitch_client_id + "&redirect_uri=" + twitch_callback + "&response_type=code&scope=" + twitch_scopes + "&state=" + session_id + "&force_verify=true"
 - var t = title + " - MS Gatekeeper"
+- var discord_link = `https://discordapp.com/channels/${guild_id}`
 
 doctype html
 html
