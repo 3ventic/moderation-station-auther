@@ -1,0 +1,12 @@
+- var discord_url = "https://discordapp.com/api/oauth2/authorize?client_id=" + discord_client_id + "&redirect_uri=" + discord_callback + "&response_type=code&scope=" + discord_scopes + "&state=" + session_id
+- var twitch_url = "https://id.twitch.tv/oauth2/authorize?client_id=" + twitch_client_id + "&redirect_uri=" + twitch_callback + "&response_type=code&scope=" + twitch_scopes + "&state=" + session_id
+- var t = title + " - MS Gatekeeper"
+
+doctype html
+html
+	head
+		meta(name="viewport" content="width=device-width, initial-scale=1")
+		meta(description="Moderation Station Gatekeeper. Link your accounts!")
+		title= t
+	body
+		block content
