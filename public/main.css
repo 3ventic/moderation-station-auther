@@ -33,6 +33,15 @@ body {
 	background-color: #6279ca;
 }
 
+#contact {
+	background-color: #43b581;
+	color: #f3f3f3;
+}
+
+#contact:hover {
+	background-color: #33a571;
+}
+
 #fl {
 	display: flex;
 	flex-direction: column;
@@ -41,6 +50,15 @@ body {
 	background-color: #2f3136;
 	padding: 5rem;
 	border-radius: 0.5rem;
+}
+
+.hidden {
+	display: none !important;
+}
+
+#rad {
+	display: flex;
+	flex-direction: column;
 }
 
 h1 {

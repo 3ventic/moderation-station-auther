@@ -3,10 +3,21 @@ extends layout
 block content
 	p The purpose of this community is to educate, share experiences, post some saucy memes, and provide a resource for channels that are looking for quality moderators for their events and/or communities on Twitch.
 	p We require some indication of current moderation experience in order to join. You must satisfy one of the following criteria:
-	ul
-		li #[img(src="https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/1" alt="(moderator badge)")] You are a channel moderator covering 15k+ total followers #[em and] 1+ partnered channel
-		li #[img(src="https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/1" alt="(verified badge)")] You are a Twitch Partner
-		li #[img(src="https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/1" alt="(employee badge)")] You are a Twitch Employee
-		li #[img(src="https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/1" alt="(VIP badge")] You are a researcher or event organizer (#[a(href="mailto:contact+ms@3v.fi") contact us])
+	div#rad
+		div
+			input(name="applicant-type" type="radio" value="auto" id="type-mod" checked)
+			label(for="type-mod") #[img(src="https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/1" alt="(moderator badge)")] You are a channel moderator covering 15k+ total followers #[em and] 1+ partnered channel
+		div
+			input(name="applicant-type" type="radio" value="auto" id="type-partner")
+			label(for="type-partner") #[img(src="https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/1" alt="(verified badge)")] You are a Twitch Partner
+		div
+			input(name="applicant-type" type="radio" value="auto" id="type-staff")
+			label(for="type-staff") #[img(src="https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/1" alt="(employee badge)")] You are a Twitch Employee
+		div
+			input(name="applicant-type" type="radio" value="contact" id="type-org")
+			label(for="type-org") #[img(src="https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/1" alt="(VIP badge")] You are a researcher or event organizer
+	p If the system is able to verify you on its own, you will automatically join the server. For this reason we need the permission to join on your behalf.
 	div
 		a.account-link#discord(href=discord_url)= 'Get Started'
+		a.account-link.hidden#contact(href="mailto:contact-ms@3v.fi")= 'Contact Us'
+	script(src=`${base_path}/discord.js`)
