@@ -12,7 +12,7 @@ import fetch, { Response as FetchResponse } from "node-fetch";
 import Session from "express-session";
 import formurlencoded from "form-urlencoded";
 import Discord from "discord.js";
-import { Roles, setRolesAndNick, GUILD_ID } from "./bot/bot";
+import { Roles, setRolesAndNick, GUILD_ID, DISCORD_API_BASE } from "./bot/bot";
 
 const BASE_PATH: string = process.env.BASE_PATH || "";
 const app: express.Express = express();
@@ -30,7 +30,6 @@ const defaults: PugDefaults = {
 const FOLLOWS_REQUIRED: number = (process.env.FOLLOWS_LIMIT && parseInt(process.env.FOLLOWS_LIMIT, 10)) || 15000;
 const PARTNERS_REQUIRED: number = (process.env.PARTNERS_LIMIT && parseInt(process.env.PARTNERS_LIMIT, 10)) || 1;
 
-const DISCORD_API_BASE: string = "https://discordapp.com/api/v6";
 const TWITCH_ID_BASE: string = "https://id.twitch.tv";
 
 const CODE_EXCHANGE_BASE_MAP: { [key: string]: string } = {
@@ -141,7 +140,7 @@ const grantRoles: (
 		roles.push(Roles.Partner);
 	}
 	try {
-		await setRolesAndNick(dUser.id, roles, nick);
+		await setRolesAndNick(session, dUser.id, roles, nick);
 		return true;
 	} catch (e) {
 		console.error("grantRoles", e);
