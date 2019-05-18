@@ -179,8 +179,12 @@ app.use(
 
 app.get("/", (req, res) => {
 	req.session!.regenerate(() => {
-		res.redirect(302, BASE_PATH + "/discord");
+		res.redirect(302, BASE_PATH + "/get-started");
 	});
+});
+
+app.get("/get-started", (req, res) => {
+	res.render("discord", { ...defaults, title: "Link Discord", session_id: encodeURIComponent(req.sessionID!) });
 });
 
 app.get("/discord", (req, res) => {
