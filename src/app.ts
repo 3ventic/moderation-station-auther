@@ -177,8 +177,10 @@ app.use(
 );
 app.use(express.static("public"));
 
-app.get("/", (_, res) => {
-	res.redirect(302, BASE_PATH + "/discord");
+app.get("/", (req, res) => {
+	req.session!.destroy(() => {
+		res.redirect(302, BASE_PATH + "/discord");
+	});
 });
 
 app.get("/discord", (req, res) => {
