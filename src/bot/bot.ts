@@ -10,24 +10,59 @@ export enum Roles {
 	Staff = "Twitch Staff"
 }
 
-const joinGuild: (session: Express.Session, userID: string) => Promise<Discord.GuildMember | null> = async (
-	session: Express.Session,
-	userID: string
-) => {
-	try {
-		const r: FetchResponse = await fetch(`${DISCORD_API_BASE}/guilds/${GUILD_ID}/members/${userID}`, {
-			method: "PUT",
-			headers: {
-				Authorization: `${session.tokens.discord.token_type} ${session.tokens.discord.access_token}`
-			}
-		});
+const allRoles: Roles[] = [Roles.Base, Roles.Partner, Roles.Staff];
 
-		const j: Discord.GuildMember = await r.json();
-		console.log("discordJoin", r.status, j);
-		return j;
-	} catch (e) {
-		console.error("discordJoin", e);
-		return null;
+const notifyHook: (
+	member: Discord.GuildMember,
+	removedRoles: Roles[],
+	addedRoles: Roles[],
+	nick: string
+) => void = async (member: Discord.GuildMember, removedRoles: Roles[], addedRoles: Roles[], nick: string) => {
+	if (process.env.DISCORD_HOOK) {
+		const payload: Discord.WebhookMessageOptions = {
+			username: "Gatekeeper",
+			embeds: [
+				{
+					fields: [
+						{
+							inline: true,
+							name: "User",
+							value: `<@${member.id}> (${member.user.tag})`
+						},
+						{
+							inline: true,
+							name: "Name",
+							value: nick
+						},
+						{
+							inline: true,
+							name: "Joined",
+							value: member.joinedAt
+								.toISOString()
+								.replace("T", " ")
+								.replace(/\.\d+/, "")
+						},
+						{
+							inline: false,
+							name: "Removed Roles",
+							value: "-" + removedRoles.join("\n-")
+						},
+						{
+							inline: false,
+							name: "Added Roles",
+							value: "+" + addedRoles.join("\n+")
+						}
+					]
+				}
+			]
+		};
+		await fetch(process.env.DISCORD_HOOK, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(payload)
+		});
 	}
 };
 
@@ -58,16 +93,22 @@ export const setRolesAndNick: (session: Express.Session, userID: string, roles: 
 		deaf: false,
 		mute: false
 	});
-	const rolesToAdd: Discord.Role[] = roles
+	const newRoles: Discord.Role[] = roles.map(r => guild.roles.filter(r2 => r2.name === r).first());
+	const rolesToAdd: Discord.Role[] = newRoles.filter(r => !member.roles.get(r.id));
+	const rolesToRemove: Discord.Role[] = allRoles
+		.filter(r => !newRoles.map(r => r.name).includes(r))
 		.map(r => guild.roles.filter(r2 => r2.name === r).first())
-		.filter(r => !member.roles.get(r.id));
-	console.log("setRolesAndNick", nick, userID, rolesToAdd.map(r => r.name));
+		.filter(r => !!member.roles.get(r.id));
+	console.log("setRolesAndNick", nick, userID, "+", rolesToAdd.map(r => r.name), "-", rolesToRemove.map(r => r.name));
 	if (member.nickname !== nick) {
 		await member.setNickname(nick, "Twitch display name");
 	}
-	if (rolesToAdd.length === 0) {
-		return;
+	if (rolesToAdd.length > 0) {
+		await member.addRoles(rolesToAdd);
 	}
-	await member.addRoles(rolesToAdd);
+	if (rolesToRemove.length > 0) {
+		await member.removeRoles(rolesToRemove);
+	}
+	notifyHook(member, rolesToRemove.map(r => r.name as Roles), rolesToAdd.map(r => r.name as Roles), nick);
 	return;
 };
