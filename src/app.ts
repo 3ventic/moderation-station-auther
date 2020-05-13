@@ -74,7 +74,8 @@ const twitchUser: (session: Express.Session) => Promise<HelixUser | null> = asyn
 	try {
 		const r: FetchResponse = await fetch("https://api.twitch.tv/helix/users", {
 			headers: {
-				Authorization: `Bearer ${session.tokens.twitch.access_token}`
+				Authorization: `Bearer ${session.tokens.twitch.access_token}`,
+				'Client-Id': process.env.TWITCH_CLIENT_ID
 			}
 		});
 
