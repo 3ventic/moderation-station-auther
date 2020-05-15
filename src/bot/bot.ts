@@ -90,14 +90,15 @@ export const setRolesAndNick: (
 		deaf: false,
 		mute: false,
 	});
+	console.log('setRolesAndNick', member);
 	const newRoles: Discord.Role[] = roles
 		.map((r) => guild.roles.cache.filter((r2) => r2.name === r).first())
 		.filter((r) => r) as Discord.Role[]; // safe cast due to filter
-	const rolesToAdd: Discord.Role[] = newRoles.filter((r) => !member.roles.resolve(r.id));
+	const rolesToAdd: Discord.Role[] = newRoles.filter((r) => !member.roles.cache.has(r.id));
 	const rolesToRemove: Discord.Role[] = allRoles
 		.filter((r) => !newRoles.map((r) => r.name).includes(r))
 		.map((r) => guild.roles.cache.filter((r2) => r2.name === r).first())
-		.filter((r) => r && !!member.roles.resolve(r.id)) as Discord.Role[]; // safe cast due to `r &&` in filter
+		.filter((r) => r && !!member.roles.cache.has(r.id)) as Discord.Role[]; // safe cast due to `r &&` in filter
 	console.log(
 		'setRolesAndNick',
 		nick,
