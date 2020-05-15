@@ -15,7 +15,10 @@ block content
 			label(for="type-staff") #[img(src="https://static-cdn.jtvnw.net/badges/v1/d97c37bd-a6f5-4c38-8f57-4e4bef88af34/1" alt="(employee badge)")] You are a Twitch Employee
 		div
 			input(name="applicant-type" type="radio" value="contact" id="type-org")
-			label(for="type-org") #[img(src="https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/1" alt="(VIP badge")] You are a researcher or event organizer
+			label(for="type-org") #[img(src="https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/1" alt="(VIP badge")] You are a researcher, event organizer or other industry professional
+		div
+			input(name="applicant-type" type="radio" value="contact" id="type-other")
+			label(for="type-other") #[img(src="https://static-cdn.jtvnw.net/badges/v1/ca3db7f7-18f5-487e-a329-cd0b538ee979/1" alt="(anon badge)")] You moderate a large community outside Twitch
 	p If the system is able to verify you on its own, you will automatically join the server. For this reason we need the permission to join on your behalf.
 	div
 		a.account-link#discord(href=discord_url)= 'Get Started'
