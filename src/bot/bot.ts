@@ -37,7 +37,7 @@ const notifyHook: (
 						{
 							inline: true,
 							name: 'Joined',
-							value: member.joinedAt.toISOString().replace('T', ' ').replace(/\.\d+/, ''),
+							value: member.joinedAt?.toISOString().replace('T', ' ').replace(/\.\d+/, ''),
 						},
 						{
 							inline: false,
@@ -72,34 +72,36 @@ client.on('error', (e) => {
 });
 
 client.on('ready', () => {
-	console.log(`bot connected ${client.user.tag}`);
+	console.log(`bot connected ${client.user!.tag}`);
 });
 
 client.login(process.env.DISCORD_TOKEN);
 
 export const setRolesAndNick: (
 	session: Express.Session,
-	userID: string,
+	user: Discord.User,
 	roles: Roles[],
 	nick: string
-) => Promise<void> = async (session: Express.Session, userID: string, roles: Roles[], nick: string) => {
-	const guild: Discord.Guild = client.guilds.get(GUILD_ID)!;
-	const member: Discord.GuildMember = await guild.addMember(userID, {
+) => Promise<void> = async (session: Express.Session, user: Discord.User, roles: Roles[], nick: string) => {
+	const guild: Discord.Guild = client.guilds.resolve(GUILD_ID)!;
+	const member: Discord.GuildMember = await guild.addMember(user, {
 		accessToken: session.tokens.discord.access_token,
 		nick: nick,
 		deaf: false,
 		mute: false,
 	});
-	const newRoles: Discord.Role[] = roles.map((r) => guild.roles.filter((r2) => r2.name === r).first());
-	const rolesToAdd: Discord.Role[] = newRoles.filter((r) => !member.roles.get(r.id));
+	const newRoles: Discord.Role[] = roles
+		.map((r) => guild.roles.cache.filter((r2) => r2.name === r).first())
+		.filter((r) => r) as Discord.Role[]; // safe cast due to filter
+	const rolesToAdd: Discord.Role[] = newRoles.filter((r) => !member.roles.resolve(r.id));
 	const rolesToRemove: Discord.Role[] = allRoles
 		.filter((r) => !newRoles.map((r) => r.name).includes(r))
-		.map((r) => guild.roles.filter((r2) => r2.name === r).first())
-		.filter((r) => !!member.roles.get(r.id));
+		.map((r) => guild.roles.cache.filter((r2) => r2.name === r).first())
+		.filter((r) => r && !!member.roles.resolve(r.id)) as Discord.Role[]; // safe cast due to `r &&` in filter
 	console.log(
 		'setRolesAndNick',
 		nick,
-		userID,
+		user,
 		'+',
 		rolesToAdd.map((r) => r.name),
 		'-',
@@ -109,10 +111,10 @@ export const setRolesAndNick: (
 		await member.setNickname(nick, 'Twitch display name');
 	}
 	if (rolesToAdd.length > 0) {
-		await member.addRoles(rolesToAdd);
+		await member.roles.add(rolesToAdd);
 	}
 	if (rolesToRemove.length > 0) {
-		await member.removeRoles(rolesToRemove);
+		await member.roles.remove(rolesToRemove);
 	}
 	notifyHook(
 		member,

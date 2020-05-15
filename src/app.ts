@@ -141,7 +141,7 @@ const grantRoles: (
 		roles.push(Roles.Partner);
 	}
 	try {
-		await setRolesAndNick(session, dUser.id, roles, nick);
+		await setRolesAndNick(session, dUser, roles, nick);
 		return true;
 	} catch (e) {
 		console.error('grantRoles', e);
