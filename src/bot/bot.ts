@@ -2,7 +2,7 @@ import Discord from 'discord.js';
 import fetch from 'node-fetch';
 
 export const GUILD_ID: string = process.env.DISCORD_GUILD_ID || '352896412880470017';
-export const DISCORD_API_BASE: string = 'https://discordapp.com/api/v6';
+export const DISCORD_API_BASE: string = 'https://discord.com/api/v6';
 
 export enum Roles {
 	Base = 'Verified',
