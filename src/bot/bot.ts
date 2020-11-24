@@ -84,7 +84,7 @@ export const setRolesAndNick: (
 	nick: string
 ) => Promise<void> = async (session: Express.Session, user: Discord.User, roles: Roles[], nick: string) => {
 	const guild: Discord.Guild = client.guilds.resolve(GUILD_ID)!;
-	const member: Discord.GuildMember = await guild.addMember(user.id, {
+	const member: Discord.GuildMember = await guild.addMember(user, {
 		accessToken: session.tokens.discord.access_token,
 		nick: nick,
 		deaf: false,
