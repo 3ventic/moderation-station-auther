@@ -6,7 +6,7 @@
     "start": "node build/app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "tsc": "tsc && cp -r ./src/views ./build/",
-    "prettify": "prettier write ."
+    "prettify": "prettier --write {src,public}/**/*.{js,ts}"
   },
   "repository": {
     "type": "git",
