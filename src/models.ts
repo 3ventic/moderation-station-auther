@@ -16,9 +16,11 @@ export type PugDefaults = DiscordDefaults &
   };
 
 export type OAuth2CallbackQuery = {
-  code: string;
+  code?: string;
   state?: string;
   scope?: string;
+  error?: string;
+  error_description?: string;
 };
 
 export type OAuth2CodeExchange = {

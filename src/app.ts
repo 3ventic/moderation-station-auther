@@ -1,18 +1,18 @@
+import Discord from "discord.js";
 import express from "express";
+import Session from "express-session";
+import formurlencoded from "form-urlencoded";
+import fetch, { Response as FetchResponse } from "node-fetch";
+import { DISCORD_API_BASE, GUILD_ID, Roles, setRolesAndNick } from "./bot/bot";
 import {
-  PugDefaults,
+  HelixGetUsersResult,
+  HelixUser,
+  ModLookupUserTotals,
   OAuth2CallbackQuery,
   OAuth2CodeExchange,
   OAuth2CodeExchangeResult,
-  ModLookupUserTotals,
-  HelixGetUsersResult,
-  HelixUser,
+  PugDefaults,
 } from "./models";
-import fetch, { Response as FetchResponse } from "node-fetch";
-import Session from "express-session";
-import formurlencoded from "form-urlencoded";
-import Discord from "discord.js";
-import { Roles, setRolesAndNick, GUILD_ID, DISCORD_API_BASE } from "./bot/bot";
 
 const BASE_PATH: string = process.env.BASE_PATH || "";
 const app: express.Express = express();
@@ -187,6 +187,9 @@ app.use(express.static("public"));
 app.set("view engine", "pug");
 app.set("views", __dirname + "/views");
 
+process.env.SESSION_SECRET =
+  process.env.SESSION_SECRET || process.env.COOKIE_SECRET;
+
 app.use(
   Session({
     cookie: {
@@ -224,11 +227,18 @@ app.get("/oauth2/discord", async (req, res) => {
   const query: OAuth2CallbackQuery = req.query as OAuth2CallbackQuery;
   if (query.state !== req.sessionID) {
     res.redirect(302, BASE_PATH + "/state_error");
+  } else if (query.error) {
+    res.render("cancelled", {
+      ...defaults,
+      title: "Cancelled",
+      session_id: encodeURIComponent(req.sessionID!),
+      error: query.error_description,
+    });
   } else {
     const exchange: OAuth2CodeExchange = {
       client_id: defaults.discord_client_id,
       client_secret: process.env.DISCORD_SECRET!,
-      code: query.code,
+      code: query.code!,
       grant_type: "authorization_code",
       redirect_uri: decodeURIComponent(defaults.discord_callback),
       scope: decodeURIComponent(defaults.discord_scopes),
@@ -252,11 +262,18 @@ app.get("/oauth2/twitch", async (req, res) => {
   const query: OAuth2CallbackQuery = req.query as OAuth2CallbackQuery;
   if (query.state !== req.sessionID) {
     res.redirect(302, BASE_PATH + "/state_error");
+  } else if (query.error) {
+    res.render("cancelled", {
+      ...defaults,
+      title: "Cancelled",
+      session_id: encodeURIComponent(req.sessionID!),
+      error: query.error_description,
+    });
   } else {
     const exchange: OAuth2CodeExchange = {
       client_id: defaults.twitch_client_id,
       client_secret: process.env.TWITCH_SECRET!,
-      code: query.code,
+      code: query.code!,
       grant_type: "authorization_code",
       redirect_uri: decodeURIComponent(defaults.twitch_callback),
       scope: decodeURIComponent(defaults.twitch_scopes),
